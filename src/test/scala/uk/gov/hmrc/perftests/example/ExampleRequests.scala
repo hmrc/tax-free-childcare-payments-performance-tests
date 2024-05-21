@@ -19,6 +19,7 @@ package uk.gov.hmrc.perftests.example
 import io.gatling.core.Predef._
 import io.gatling.core.check.CheckBuilder
 import io.gatling.core.check.css.CssCheckType
+import io.gatling.core.check.regex.RegexCheckType
 import io.gatling.http.Predef._
 import io.gatling.http.request.builder.HttpRequestBuilder
 import jodd.lagarto.dom.NodeSelector
@@ -26,58 +27,54 @@ import uk.gov.hmrc.performance.conf.ServicesConfiguration
 
 object ExampleRequests extends ServicesConfiguration {
 
-  val baseUrl: String = baseUrlFor("example-frontend")
-  val route: String   = "/check-your-vat-flat-rate"
+  val bearerToken: String   = readProperty("bearerToken", "${accessToken}")
 
-  val navigateToHomePage: HttpRequestBuilder =
-    http("Navigate to Home Page")
-      .get("http://localhost:9949/auth-login-stub/gg-sign-in")
-      .check(status.is(200))
-      //.check(css("input[name=csrfToken]", "value").saveAs("csrfToken"))
+  val baseUrl: String       = baseUrlFor("tfcp")+"/individuals/tax-free-childcare/payments"
+  lazy val CsrfPattern                  = """<input type="hidden" name="csrfToken" value="([^"]+)""""
+  lazy val baseUrl_Auth: String         = baseUrlFor("auth-login-stub")
 
-  val postVatReturnPeriod: HttpRequestBuilder =
-    http("Post VAT return Period")
-      .post("http://localhost:9949/auth-login-stub/gg-sign-in")
-      .formParam("authorityId", "1234")
-      .formParam("redirectionUrl", "http://localhost:9949/auth-login-stub/session")
-      .formParam("excludeGnapToken", "true")
-      .formParam("credentialStrength", "strong")
-      .formParam("confidenceLevel", "250")
-      .formParam("affinityGroup", "Individual")
-      .formParam("enrolments", "[]")
-      .formParam("nino", "AB123456C")
+   lazy val authBaseUrl: String  = baseUrlFor("auth-login-stub")
+
+  lazy val authUrl: String = s"$authBaseUrl/auth-login-stub/gg-sign-in"
+  lazy val redirectionUrl  = s"$authBaseUrl/auth-login-stub/session"
+
+
+  def saveCsrfToken(): CheckBuilder[RegexCheckType, String, String] = regex(_ => CsrfPattern).saveAs("csrfToken")
+
+
+
+  def postAuthLogin(): HttpRequestBuilder =
+    http("Enter Auth login credentials ")
+      .post(authUrl)
+  .formParam("authorityId", "1234")
+    .formParam("redirectionUrl", redirectionUrl)
+    .formParam("excludeGnapToken", "true")
+    .formParam("credentialStrength", "strong")
+    .formParam("confidenceLevel", "250")
+    .formParam("affinityGroup", "Individual")
+    .formParam("enrolments", "[]")
+    .formParam("nino", "AB123456C")
       .check(status.is(303))
       .check(bodyString.saveAs("responseBody"))
 
-//  val getSession: HttpRequestBuilder =
-//    http("Get auth login stub session information")
-//      .get("http://localhost:9949/auth-login-stub/session")
-//      .check(status.is(200))
-//      .check(saveBearerToken)
+  val getSession: HttpRequestBuilder =
+    http("Get auth login stub session information")
+      .get(redirectionUrl)
+      .check(status.is(200))
+      .check(saveBearerToken)
 
   def saveBearerToken: CheckBuilder[CssCheckType, NodeSelector, String] =
     css("[data-session-id=authToken] > code")
       .saveAs("accessToken")
 
-     // .check(header("Location").is("/check-your-vat-flat-rate/turnover").saveAs("turnOverPage"))
-
-  val getTurnoverPage: HttpRequestBuilder =
-    http("Get Turnover Page")
-      .get("http://localhost:9949/auth-login-stub/session")
-      .check(status.is(200))
-      .check(saveBearerToken)
-
   val postLink: HttpRequestBuilder =
     http("Post link endpoint")
-      .post("http://localhost:10500/individuals/tax-free-childcare/payments/link")
+      .post(s"$baseUrl/link")
       .header("Content-Type","application/json")
       .header("Accept","application/vnd.hmrc.1.0+json")
-      .header("Authorization","Bearer BXQ3/Treo4kQCZvVcCqKPjTopmv6LMjAMmvpCMEn1P3Lm1K/vpQE6qsfVpjwFl1pS3Mtur8rWkYLKTCGgYl6WTt3OjlofUZ/KAfl1yNIi6wYpN1us94sbQ8TtQmIiWcloSkelzst75MuEbhxFH6ZJNj54dWH7hL34rUOKikcYPn9KwIkeIPK/mMlBESjue4V")
-      .header("Correlation-ID","5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
-      //      .headers(Map("Content-Type" -> "application/json"))
-//      .headers(Map("Accept" -> "application/vnd.hmrc.1.0+json"))
-//      .headers(Map("Authorization" -> "Bearer BXQ3/Treo4kQCZvVcCqKPtZy+ZKR2wkzNJDCVnBN2BkA4Ixr9RFUDWcw//PoXn3yvXvh3449fu6ujbm7AtiPwZapx2CLx5DvZ2No9zg3NpMA5p47C6pzqau9B9Yd9j42gC2TIr2IR3Dk2OPMMxLbPwiuQZQLltdYel9h2dlePZz9KwIkeIPK/mMlBESjue4V"))
-//      .headers(Map("Correlation-ID" -> "5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b"))
+     .header("Authorization",s"$bearerToken")
+  // .header("Authorization","Bearer BXQ3/Treo4kQCZvVcCqKPs6CmGhGZHLclRqnlnlCXMr0aNVC3/4v3GVLbudsFY7BMnRmKOGYQQqEKfy/3ToA9aYmUIvE/6DxkhKtZ+zLLUJlYfhU3fGbnBW4xgxOK2wORjCU+2OHTUz6SX0CRLH+xKf6ZEnRizR3FRZWMCy9PbT9KwIkeIPK/mMlBESjue4V")
+    .header("Correlation-ID","5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
       .body(StringBody(linkPayload()))
       .check(status.is(200))
 
