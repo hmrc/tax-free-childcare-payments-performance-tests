@@ -27,6 +27,11 @@ class ExampleSimulation extends PerformanceTestRunner {
 
   setup("get-auth-login", "Get turnover page") withRequests getSession
 
- setup("post-Link","post TFCP Link") withRequests  postLink
+ setup("post-Link","post TFCP Link") withRequests  sendPaymentRequest
+//
+//  setup("post-Balance","post TFCP Balance") withRequests  postBalance
+//
+//  setup("post-Payment","post TFCP Payment") withRequests  postPayment
+
   runSimulation()
 }

@@ -67,16 +67,61 @@ object ExampleRequests extends ServicesConfiguration {
     css("[data-session-id=authToken] > code")
       .saveAs("accessToken")
 
-  val postLink: HttpRequestBuilder =
+//  val postLink: HttpRequestBuilder =
+//    http("Post link endpoint")
+//      .post(s"$baseUrl/link")
+//      .header("Content-Type","application/json")
+//      .header("Accept","application/vnd.hmrc.1.0+json")
+//    .header("Authorization",s"$abcbearerToken")
+//   //.header("Authorization","Bearer BXQ3/Treo4kQCZvVcCqKPs6CmGhGZHLclRqnlnlCXMr0aNVC3/4v3GVLbudsFY7BMnRmKOGYQQqEKfy/3ToA9aYmUIvE/6DxkhKtZ+zLLUJlYfhU3fGbnBW4xgxOK2wORjCU+2OHTUz6SX0CRLH+xKf6ZEnRizR3FRZWMCy9PbT9KwIkeIPK/mMlBESjue4V")
+//    .header("Correlation-ID","5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
+//      .body(StringBody(linkPayload()))
+//      .check(status.is(200))
+val sendPaymentRequest : HttpRequestBuilder=
+    http("Payment Link Request")
+//      .post(s"$baseUrl/link")
+//      .header("Content-Type","application/json")
+//      .header("Authorization", s"$bearerToken")
+//      .header("Accept", "application/vnd.hmrc.1.0+json")
+//      .header("Correlation-ID", "5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
+//      .body(StringBody(linkPayload))
+//      .check(status.is(200))
+//      .check(jsonPath("$.data").saveAs("responseData"))
+.post(s"$baseUrl/link")
+      .header("Authorization", s"$bearerToken")
+      .header("Content-Type","application/json")
+      .header("Accept", "application/vnd.hmrc.1.0+json")
+      .header("Correlation-ID", "5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
+      .body(StringBody(linkPayload())).asJson
+      .check(status.not(403), status.not(404)) // Check that the status is not 403 or 404
+      .check(status.is(200)) // Check for a successful response
+      .check(jsonPath("$.data").saveAs("responseData"))
+//  .exec { session =>
+//    println("Response Data: " + session("responseData").asOption[String].getOrElse("No data found"))
+//    session
+//  }
+  val postBalance: HttpRequestBuilder =
     http("Post link endpoint")
-      .post(s"$baseUrl/link")
+      .post(s"$baseUrl/balance")
       .header("Content-Type","application/json")
       .header("Accept","application/vnd.hmrc.1.0+json")
-     .header("Authorization",s"$bearerToken")
-  // .header("Authorization","Bearer BXQ3/Treo4kQCZvVcCqKPs6CmGhGZHLclRqnlnlCXMr0aNVC3/4v3GVLbudsFY7BMnRmKOGYQQqEKfy/3ToA9aYmUIvE/6DxkhKtZ+zLLUJlYfhU3fGbnBW4xgxOK2wORjCU+2OHTUz6SX0CRLH+xKf6ZEnRizR3FRZWMCy9PbT9KwIkeIPK/mMlBESjue4V")
-    .header("Correlation-ID","5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
-      .body(StringBody(linkPayload()))
+   //   .header("Authorization",s"$bearerToken")
+   .header("Authorization","Bearer BXQ3/Treo4kQCZvVcCqKPs6CmGhGZHLclRqnlnlCXMr0aNVC3/4v3GVLbudsFY7BMnRmKOGYQQqEKfy/3ToA9aYmUIvE/6DxkhKtZ+zLLUJlYfhU3fGbnBW4xgxOK2wORjCU+2OHTUz6SX0CRLH+xKf6ZEnRizR3FRZWMCy9PbT9KwIkeIPK/mMlBESjue4V")
+      .header("Correlation-ID","5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
+      .body(StringBody(balancePayload()))
       .check(status.is(200))
+
+  val postPayment: HttpRequestBuilder =
+    http("Post link endpoint")
+      .post(s"$baseUrl/")
+      .header("Content-Type","application/json")
+      .header("Accept","application/vnd.hmrc.1.0+json")
+      .header("Authorization",s"$bearerToken")
+     //.header("Authorization","Bearer BXQ3/Treo4kQCZvVcCqKPs6CmGhGZHLclRqnlnlCXMr0aNVC3/4v3GVLbudsFY7BMnRmKOGYQQqEKfy/3ToA9aYmUIvE/6DxkhKtZ+zLLUJlYfhU3fGbnBW4xgxOK2wORjCU+2OHTUz6SX0CRLH+xKf6ZEnRizR3FRZWMCy9PbT9KwIkeIPK/mMlBESjue4V")
+      .header("Correlation-ID","5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
+      .body(StringBody(paymentPayload()))
+      .check(status.is(200))
+
 
   def linkPayload(
                  ): String =
@@ -86,6 +131,30 @@ object ExampleRequests extends ServicesConfiguration {
        | "epp_reg_reference":"EPPRegReffEPPReg",
        | "outbound_child_payment_ref":"AAAA00000TFC",
        | "child_date_of_birth":"2023-05-06"
+       | }
+    """.stripMargin
+
+  def balancePayload(
+                 ): String =
+    s"""
+       | {
+       | "epp_unique_customer_id":"12345678910",
+       | "epp_reg_reference":"EPPRegReffEPPReg",
+       | "outbound_child_payment_ref":"AAAA00000TFC"
+       | }
+    """.stripMargin
+
+  def paymentPayload(
+                    ): String =
+    s"""
+       | {
+       | "epp_unique_customer_id":"12345678910",
+       | "epp_reg_reference":"EPPRegReffEPPReg",
+       | "payment_amount":1234.56,
+       | "ccp_reg_reference": "string",
+       | "ccp_postcode": "AB12 3CD",
+       | "payee_type": "ccp",
+       | "outbound_child_payment_ref": "AAAA00000TFC"
        | }
     """.stripMargin
 }
