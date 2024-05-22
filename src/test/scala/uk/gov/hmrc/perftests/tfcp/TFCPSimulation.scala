@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.perftests.example
+package uk.gov.hmrc.perftests.tfcp
 
 import uk.gov.hmrc.performance.simulation.PerformanceTestRunner
-import uk.gov.hmrc.perftests.example.ExampleRequests._
+import uk.gov.hmrc.perftests.tfcp.TFCPRequests._
 
-class ExampleSimulation extends PerformanceTestRunner {
+class TFCPSimulation extends PerformanceTestRunner {
 
-//  setup("home-page", "Home Page") withRequests navigateToHomePage
+  setup("post-auth-login", "Post auth stub login") withRequests postAuthApiSessionLogin
 
-  setup("post-auth-login", "Post vat return period") withRequests postAuthLogin
+  setup("post-Link", "post TFCP Link") withRequests postLink
 
-  setup("get-auth-login", "Get turnover page") withRequests getSession
+  setup("post-Balance", "post TFCP Balance") withRequests postBalance
 
- setup("post-Link","post TFCP Link") withRequests  sendPaymentRequest
-//
-//  setup("post-Balance","post TFCP Balance") withRequests  postBalance
-//
-//  setup("post-Payment","post TFCP Payment") withRequests  postPayment
+  setup("post-Payment", "post TFCP Payment") withRequests postPayment
 
   runSimulation()
 }
