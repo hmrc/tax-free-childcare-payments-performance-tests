@@ -55,7 +55,7 @@ object TFCPRequests extends ServicesConfiguration {
       .check(status.is(200))
 
   val postBalance: HttpRequestBuilder =
-    http("Post link endpoint")
+    http("Post balance endpoint")
       .post(s"$baseUrl/balance")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.0+json")
@@ -65,7 +65,7 @@ object TFCPRequests extends ServicesConfiguration {
       .check(status.is(200))
 
   val postPayment: HttpRequestBuilder =
-    http("Post link endpoint")
+    http("Post payment endpoint")
       .post(s"$baseUrl/")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.0+json")
