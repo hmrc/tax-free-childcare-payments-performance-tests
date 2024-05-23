@@ -23,6 +23,8 @@ import io.gatling.http.check.header.HttpHeaderCheckType
 import io.gatling.http.request.builder.HttpRequestBuilder
 import uk.gov.hmrc.performance.conf.ServicesConfiguration
 
+import scala.util.Random
+
 object TFCPRequests extends ServicesConfiguration {
 
   val bearerToken: String = readProperty("bearerToken", "${authBearerToken}")
@@ -36,7 +38,7 @@ object TFCPRequests extends ServicesConfiguration {
   val postAuthApiSessionLogin: HttpRequestBuilder =
     http("Post to Auth API Session Login")
       .post(authUrl)
-      .body(StringBody(authPayload("AB123456A")))
+      .body(StringBody(authPayload("${nino}")))
       .header("Content-Type", "application/json")
       .check(saveAuthBearerToken)
 
@@ -49,8 +51,8 @@ object TFCPRequests extends ServicesConfiguration {
       .header("Authorization", s"$bearerToken")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.0+json")
-      .header("Correlation-ID", "5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
-      .body(StringBody(linkPayload()))
+      .header("Correlation-ID", "${corelationId}")
+      .body(StringBody(linkPayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}","${childDateOfBirth}")))
       .asJson
       .check(status.is(200))
 
@@ -60,8 +62,8 @@ object TFCPRequests extends ServicesConfiguration {
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.0+json")
       .header("Authorization", s"$bearerToken")
-      .header("Correlation-ID", "5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
-      .body(StringBody(balancePayload()))
+      .header("Correlation-ID", "${corelationId}")
+      .body(StringBody(balancePayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}")))
       .check(status.is(200))
 
   val postPayment: HttpRequestBuilder =
@@ -70,14 +72,15 @@ object TFCPRequests extends ServicesConfiguration {
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.0+json")
       .header("Authorization", s"$bearerToken")
-      .header("Correlation-ID", "5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b")
-      .body(StringBody(paymentPayload()))
+      .header("Correlation-ID", "${corelationId}")
+      .body(StringBody(paymentPayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}","${ccpRegReference}","${ccpPostcode}","${payeeType}","${paymentAmount}")))
       .check(status.is(200))
+
 
   def authPayload(nino: String): String =
     s"""
        |{
-       |  "credId": "$nino",
+       |  "credId": "$credID",
        |  "affinityGroup": "Individual",
        |  "confidenceLevel": 250,
        |  "credentialStrength": "strong",
@@ -85,38 +88,42 @@ object TFCPRequests extends ServicesConfiguration {
        |  "nino": "$nino"
        |}
        |""".stripMargin
-  def linkPayload(
+
+  def credID:String =
+    Array.fill(16)(Random.nextInt(10)).mkString
+
+  def linkPayload(eppUniqueCustomerId:String,eppRegReference:String,outboundChildPaymentRef:String,childDateOfBirth:String
   ): String =
     s"""
        | {
-       | "epp_unique_customer_id":"12345678910",
-       | "epp_reg_reference":"EPPRegReffEPPReg",
-       | "outbound_child_payment_ref":"AAAA00000TFC",
-       | "child_date_of_birth":"2023-05-06"
+       | "epp_unique_customer_id":"$eppUniqueCustomerId",
+       | "epp_reg_reference":"$eppRegReference",
+       | "outbound_child_payment_ref":"$outboundChildPaymentRef",
+       | "child_date_of_birth":"$childDateOfBirth"
        | }
     """.stripMargin
 
-  def balancePayload(
+  def balancePayload(eppUniqueCustomerId:String,eppRegReference:String,outboundChildPaymentRef:String
   ): String =
     s"""
        | {
-       | "epp_unique_customer_id":"12345678910",
-       | "epp_reg_reference":"EPPRegReffEPPReg",
-       | "outbound_child_payment_ref":"AAAA00000TFC"
+       | "epp_unique_customer_id":"$eppUniqueCustomerId",
+       | "epp_reg_reference":"$eppRegReference",
+       | "outbound_child_payment_ref":"$outboundChildPaymentRef"
        | }
     """.stripMargin
 
-  def paymentPayload(
+  def paymentPayload(eppUniqueCustomerId:String,eppRegReference:String,outboundChildPaymentRef:String,ccpRegReference:String,ccpPostcode:String,payeeType:String,paymentAmount:String
   ): String =
     s"""
        | {
-       | "epp_unique_customer_id":"12345678910",
-       | "epp_reg_reference":"EPPRegReffEPPReg",
-       | "payment_amount":1234.56,
-       | "ccp_reg_reference": "string",
-       | "ccp_postcode": "AB12 3CD",
-       | "payee_type": "ccp",
-       | "outbound_child_payment_ref": "AAAA00000TFC"
+       | "epp_unique_customer_id":"$eppUniqueCustomerId",
+       | "epp_reg_reference":"$eppRegReference",
+       | "payment_amount":"$paymentAmount",
+       | "ccp_reg_reference": "$ccpRegReference",
+       | "ccp_postcode": "$ccpPostcode",
+       | "payee_type": "$payeeType",
+       | "outbound_child_payment_ref": "$outboundChildPaymentRef"
        | }
     """.stripMargin
 }
