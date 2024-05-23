@@ -2,22 +2,16 @@
 # tax-free-childcare-payments-performance-tests
 
 
-Performance test suite for the `<digital service name>`, using [performance-test-runner](https://github.com/hmrc/performance-test-runner) under the hood.
+Performance test suite for the `Tax-free Childcare API`, using [performance-test-runner](https://github.com/hmrc/performance-test-runner) under the hood.
 
 ## Pre-requisites
 
 ### Services
 
-Start Mongo Docker container as follows:
-
-```bash
-docker run --name mongodb -p 27017:27017 -d percona/percona-server-mongodb:4.4 
-```
-
 To run performance tests locally, execute
 
 ```bash
-sm2 --start TFC_PAYMENTS_ALL--wait 100
+sm2 --start TFC_PAYMENTS_ALL --wait 100
 ```
 
 Using the `--wait 100` argument ensures a health check is run on all the services started as part of the profile. `100` refers to the given number of seconds to wait for services to pass health checks.
