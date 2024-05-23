@@ -1,0 +1,2 @@
+nino,corelationId,eppUniqueCustomerId,eppRegReference,outboundChildPaymentRef,childDateOfBirth,ccpRegReference,ccpPostcode,payeeType,paymentAmount
+AB123456C,5c5ef9c2-72e8-4d4f-901e-9fec3db8c64b,12345678910,EPPRegReffEPPReg,AAAA00000TFC,2023-05-06,RP123456,AB12 3CD,ccp,123.45
