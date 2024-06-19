@@ -20,7 +20,8 @@ import uk.gov.hmrc.performance.simulation.PerformanceTestRunner
 import uk.gov.hmrc.perftests.tfcp.TFCPRequests._
 
 class TFCPSimulation extends PerformanceTestRunner {
-if(baseUrl.contains("localhost")) {
+
+if(runLocal) {
   println("This is local")
   setup("get-gg-signin", "Post auth stub login") withRequests postAuthApiSessionLogin
 }
@@ -38,7 +39,6 @@ setup("get-gg-signin","GG sign in") withRequests (getAuthId,
   getAccessTokenGG)
 }
   setup("post-Link", "post TFCP Link") withRequests postLink
-
 
   setup("post-Balance", "post TFCP Balance") withRequests postBalance
 

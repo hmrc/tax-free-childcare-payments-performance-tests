@@ -33,8 +33,8 @@ object TFCPRequests extends ServicesConfiguration {
 
   val bearerToken: String = readProperty("bearerToken", "${accessToken}")
 
-//  val baseUrl: String = baseUrlFor("tfcp") + "/individuals/tax-free-childcare/payments"
-val baseUrl: String = baseUrlFor("tfcp")
+  val baseUrl: String = baseUrlFor("tfcp") + "/individuals/tax-free-childcare/payments"
+//val baseUrl: String = baseUrlFor("tfcp")
 
   lazy val CsrfPattern                  = """<input type="hidden" name="csrfToken" value="([^"]+)""""
   lazy val baseUrl_Auth: String         = baseUrlFor("auth-login-stub")
@@ -62,32 +62,35 @@ val baseUrl: String = baseUrlFor("tfcp")
 
   val postLink: HttpRequestBuilder =
     http("Payment Link Request")
-      .post("https://api.staging.tax.service.gov.uk/individuals/tax-free-childcare/payments/link")
+      .post(s"$baseUrl/link")
       .header("Authorization", s"Bearer $bearerToken")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.2+json")
       .header("Correlation-ID", "${corelationId}")
+      .header("Referer", "")
       .body(StringBody(linkPayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}","${childDateOfBirth}")))
       .asJson
       .check(status.is(200))
 
   val postBalance: HttpRequestBuilder =
     http("Post balance endpoint")
-      .post("https://api.staging.tax.service.gov.uk/individuals/tax-free-childcare/payments/balance")
+      .post(s"$baseUrl/balance")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.2+json")
       .header("Authorization", s"Bearer $bearerToken")
       .header("Correlation-ID", "${corelationId}")
+      .header("Referer", "")
       .body(StringBody(balancePayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}")))
       .check(status.is(200))
 
   val postPayment: HttpRequestBuilder =
     http("Post payment endpoint")
-      .post("https://api.staging.tax.service.gov.uk/individuals/tax-free-childcare/payments")
+      .post(s"$baseUrl")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.2+json")
       .header("Authorization", s"Bearer $bearerToken")
       .header("Correlation-ID", "${corelationId}")
+      .header("Referer", "")
       .body(StringBody(paymentPayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}","${ccpRegReference}","${ccpPostcode}","${payeeType}","${paymentAmount}")))
       .check(status.is(200))
 
@@ -224,7 +227,7 @@ val baseUrl: String = baseUrlFor("tfcp")
   def authLogin(): HttpRequestBuilder =
     http("login Step")
       .post(baseUrl_Auth + "/auth-login-stub/gg-sign-in")
-      .formParam("redirectionUrl", "https://www.staging.tax.service.gov.uk/oauth/authorize?client_id=OYOi7ZgefYKJQqVT7QuYOtNEWTaV&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=tax-free-childcare-payments&response_type=code")
+      .formParam("redirectionUrl", s"$baseUrl_Auth/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&scope=$scope&response_type=code")
       .formParam("credentialStrength", "strong")
       .formParam("confidenceLevel", "250")
       .formParam("authorityId", "abcd")
