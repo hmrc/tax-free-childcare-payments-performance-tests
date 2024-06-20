@@ -37,7 +37,7 @@ object TFCPRequests extends ServicesConfiguration {
 //val baseUrl: String = baseUrlFor("tfcp")
 
   lazy val CsrfPattern                  = """<input type="hidden" name="csrfToken" value="([^"]+)""""
-  lazy val baseUrl_Auth: String         = baseUrlFor("auth-login-stub")
+ // lazy val baseUrl_Auth: String         = baseUrlFor("auth-login-stub")
   lazy val baseUrl_Auth_Token: String   = baseUrlFor("tfcp")
   lazy val jsonPattern: UnanchoredRegex = """\{"\w+":"([^"]+)""".r.unanchored
 
@@ -164,7 +164,7 @@ object TFCPRequests extends ServicesConfiguration {
   def getAuthId: HttpRequestBuilder =
     http(requestName = "get AuthId")
       .get(
-        s"$baseUrl_Auth/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&scope=$scope&response_type=code"
+        s"$authBaseUrl/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&scope=$scope&response_type=code"
       )
       .check(status.is(expected = 303))
       .check(
@@ -207,27 +207,27 @@ object TFCPRequests extends ServicesConfiguration {
 
   def getStart: HttpRequestBuilder =
     http("get Start")
-      .get(baseUrl_Auth + "/oauth/start?auth_id=${auth_id}")
+      .get(authBaseUrl + "/oauth/start?auth_id=${auth_id}")
       .check(status.is(200))
 
   def getGrantAuthority303: HttpRequestBuilder =
     http("get Grant Authority 303")
-      .get(baseUrl_Auth + "/oauth/grantscope?auth_id=${auth_id}")
+      .get(authBaseUrl + "/oauth/grantscope?auth_id=${auth_id}")
       .check(status.is(303))
       .check(
         header("Location")
-          .is(baseUrl_Auth + "/gg/sign-in?continue=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend")
+          .is(authBaseUrl + "/gg/sign-in?continue=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend")
       )
 
   def getCredentialsPage: HttpRequestBuilder =
     http("get credentials page")
-      .get(baseUrl_Auth + "/auth-login-stub/gg-sign-in")
+      .get(authBaseUrl + "/auth-login-stub/gg-sign-in")
       .check(status.is(200))
 
   def authLogin(): HttpRequestBuilder =
     http("login Step")
-      .post(baseUrl_Auth + "/auth-login-stub/gg-sign-in")
-      .formParam("redirectionUrl", s"$baseUrl_Auth/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&scope=$scope&response_type=code")
+      .post(authBaseUrl + "/auth-login-stub/gg-sign-in")
+      .formParam("redirectionUrl", s"$authBaseUrl/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&scope=$scope&response_type=code")
       .formParam("credentialStrength", "strong")
       .formParam("confidenceLevel", "250")
       .formParam("authorityId", "abcd")
@@ -238,31 +238,31 @@ object TFCPRequests extends ServicesConfiguration {
 
   def grantAuthorityRedirect: HttpRequestBuilder =
     http("get Grant Authority 2nd Redirect")
-      .get(baseUrl_Auth + "/gg/sign-in?continue=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend")
+      .get(authBaseUrl + "/gg/sign-in?continue=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend")
       .check(status.is(303))
       .check(
         header("Location")
           .is(
-            baseUrl_Auth + "/bas-gateway/sign-in?continue_url=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend"
+            authBaseUrl + "/bas-gateway/sign-in?continue_url=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend"
           )
       )
 
   def grantAuthorityRedirect2: HttpRequestBuilder =
     http("get Grant Authority  Redirect2")
       .get(
-        baseUrl_Auth + "/bas-gateway/sign-in?continue_url=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend"
+        authBaseUrl + "/bas-gateway/sign-in?continue_url=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend"
       )
       .check(status.is(303))
 
   def getGrantAuthority200: HttpRequestBuilder =
     http("get Grant Authority 200")
-      .get(baseUrl_Auth + "/oauth/grantscope?auth_id=${auth_id}")
+      .get(authBaseUrl + "/oauth/grantscope?auth_id=${auth_id}")
       .check(status.is(200))
       .check(saveCsrfToken())
 
   def submitGrantAuthority: HttpRequestBuilder =
     http("submit Grant Authority")
-      .post(baseUrl_Auth + "/oauth/grantscope": String)
+      .post(authBaseUrl + "/oauth/grantscope": String)
       .formParam("csrfToken", "${csrfToken}")
       .formParam("auth_id", "${auth_id}")
       .check(status.is(200))
