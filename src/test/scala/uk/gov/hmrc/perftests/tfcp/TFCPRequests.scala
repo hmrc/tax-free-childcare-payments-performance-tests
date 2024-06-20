@@ -39,8 +39,8 @@ val baseUrl: String = baseUrlFor("tfcp")
   lazy val baseUrl_Auth_Token: String   = baseUrlFor("auth-retrieve-token")
   lazy val jsonPattern: UnanchoredRegex = """\{"\w+":"([^"]+)""".r.unanchored
 
-  lazy val clientId             = "OYOi7ZgefYKJQqVT7QuYOtNEWTaV"
-  lazy val clientSecret: String = "fe7af946-0344-4336-ab78-3f115c51d1ce"
+  lazy val clientId             = sys.env("CLIENT_ID")
+  lazy val clientSecret: String = sys.env("CLIENT_SECRET")
   lazy val redirectUri: String  = "urn:ietf:wg:oauth:2.0:oob"
   lazy val authBaseUrl: String  = baseUrlFor("auth-login-stub")
 
@@ -65,7 +65,7 @@ val baseUrl: String = baseUrlFor("tfcp")
       .header("Authorization", s"Bearer $bearerToken")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.2+json")
-      .header("Correlation-ID", "${corelationId}")
+      .header("Correlation-ID", "${correlationId}")
       .header("Referer", "")
       .body(StringBody(linkPayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}","${childDateOfBirth}")))
       .asJson
@@ -77,7 +77,7 @@ val baseUrl: String = baseUrlFor("tfcp")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.2+json")
       .header("Authorization", s"Bearer $bearerToken")
-      .header("Correlation-ID", "${corelationId}")
+      .header("Correlation-ID", "${correlationId}")
       .header("Referer", "")
       .body(StringBody(balancePayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}")))
       .check(status.is(200))
@@ -88,7 +88,7 @@ val baseUrl: String = baseUrlFor("tfcp")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.2+json")
       .header("Authorization", s"Bearer $bearerToken")
-      .header("Correlation-ID", "${corelationId}")
+      .header("Correlation-ID", "${correlationId}")
       .header("Referer", "")
       .body(StringBody(paymentPayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}","${ccpRegReference}","${ccpPostcode}","${payeeType}","${paymentAmount}")))
       .check(status.is(200))
