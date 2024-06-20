@@ -21,8 +21,21 @@ import uk.gov.hmrc.perftests.tfcp.TFCPRequests._
 
 class TFCPSimulation extends PerformanceTestRunner {
 
-  setup("post-auth-login", "Post auth stub login") withRequests postAuthApiSessionLogin
-
+if(runLocal) {
+  setup("get-gg-signin", "Post auth stub login") withRequests postAuthApiSessionLogin
+}
+else {
+setup("get-gg-signin","GG sign in") withRequests (getAuthId,
+  getStart,
+  getGrantAuthority303,
+  getCredentialsPage,
+  authLogin(),
+  grantAuthorityRedirect,
+  grantAuthorityRedirect2,
+  getGrantAuthority200,
+  submitGrantAuthority,
+  getAccessTokenGG)
+}
   setup("post-Link", "post TFCP Link") withRequests postLink
 
   setup("post-Balance", "post TFCP Balance") withRequests postBalance
