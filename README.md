@@ -41,7 +41,7 @@ sbt -DrunLocal=true gatling:test
 ```
 
 Run smoke test (staging) as follows:
-
+Client id and secret can be found in the configured test app in developer hub
 ```bash
 export CLIENT_ID=<client id>
 ```
