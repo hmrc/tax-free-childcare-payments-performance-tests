@@ -33,12 +33,10 @@ object TFCPRequests extends ServicesConfiguration {
 
   val bearerToken: String = readProperty("bearerToken", "${accessToken}")
 
-  val baseUrl: String = baseUrlFor("tfcp") + "/individuals/tax-free-childcare/payments"
-//val baseUrl: String = baseUrlFor("tfcp")
+val baseUrl: String = baseUrlFor("tfcp")
 
   lazy val CsrfPattern                  = """<input type="hidden" name="csrfToken" value="([^"]+)""""
- // lazy val baseUrl_Auth: String         = baseUrlFor("auth-login-stub")
-  lazy val baseUrl_Auth_Token: String   = baseUrlFor("tfcp")
+  lazy val baseUrl_Auth_Token: String   = baseUrlFor("auth-retrieve-token")
   lazy val jsonPattern: UnanchoredRegex = """\{"\w+":"([^"]+)""".r.unanchored
 
   lazy val clientId             = "OYOi7ZgefYKJQqVT7QuYOtNEWTaV"
@@ -48,11 +46,12 @@ object TFCPRequests extends ServicesConfiguration {
 
   lazy val authUrl: String = s"$authBaseUrl/auth-login-stub/gg-sign-in"
   lazy val redirectionUrl  = s"$authBaseUrl/auth-login-stub/session"
+  lazy val authUrlLocal: String = s"$authBaseUrl/government-gateway/session/login"
   lazy val scope: String   = "tax-free-childcare-payments"
 
   val postAuthApiSessionLogin: HttpRequestBuilder =
     http("Post to Auth API Session Login")
-      .post(authUrl)
+      .post(authUrlLocal)
       .body(StringBody(authPayload("${nino}")))
       .header("Content-Type", "application/json")
       .check(saveAuthBearerToken)
@@ -145,20 +144,6 @@ object TFCPRequests extends ServicesConfiguration {
        | }
     """.stripMargin
 
-  def stagingPayload(): String =
-    s"""
-       | {
-       | "redirectionUrl": "https://www.staging.tax.service.gov.uk/oauth/authorize?client_id=OYOi7ZgefYKJQqVT7QuYOtNEWTaV&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=tax-free-childcare-payments&response_type=code",
-       |   "credId": "$credID",
-       |  "affinityGroup": "Individual",
-       |  "confidenceLevel": 250,
-       |  "credentialStrength": "strong",
-       |  "enrolments": [],
-       |  "nino": "AB123456C"
-       | }
-    """.stripMargin
-
-
   def saveCsrfToken(): CheckBuilder[RegexCheckType, String, String] = regex(_ => CsrfPattern).saveAs("csrfToken")
 
   def getAuthId: HttpRequestBuilder =
@@ -183,7 +168,7 @@ object TFCPRequests extends ServicesConfiguration {
       .formParam("confidenceLevel", "250")
       .formParam("affinityGroup", "Individual")
       .formParam("enrolments","[]")
-      .formParam("nino", "AB123456C")
+      .formParam("nino", "${nino}")
       .check(status.is(303))
       .check(bodyString.saveAs("responseBody"))
 
@@ -230,10 +215,10 @@ object TFCPRequests extends ServicesConfiguration {
       .formParam("redirectionUrl", s"$authBaseUrl/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&scope=$scope&response_type=code")
       .formParam("credentialStrength", "strong")
       .formParam("confidenceLevel", "250")
-      .formParam("authorityId", "abcd")
+      .formParam("authorityId", "${nino}")
       .formParam("affinityGroup", "Individual")
       .formParam("enrolments","[]")
-      .formParam("nino", "AB123456C")
+      .formParam("nino", "${nino}")
       .check(status.is(303))
 
   def grantAuthorityRedirect: HttpRequestBuilder =

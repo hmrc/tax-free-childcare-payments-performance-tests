@@ -22,11 +22,9 @@ import uk.gov.hmrc.perftests.tfcp.TFCPRequests._
 class TFCPSimulation extends PerformanceTestRunner {
 
 if(runLocal) {
-  println("This is local")
   setup("get-gg-signin", "Post auth stub login") withRequests postAuthApiSessionLogin
 }
 else {
-  println("This is staging")
 setup("get-gg-signin","GG sign in") withRequests (getAuthId,
   getStart,
   getGrantAuthority303,
