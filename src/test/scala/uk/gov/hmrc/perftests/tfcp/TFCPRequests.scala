@@ -56,8 +56,9 @@ val baseUrl: String = baseUrlFor("tfcp")
       .header("Content-Type", "application/json")
       .check(saveAuthBearerToken)
 
-  def saveAuthBearerToken: CheckBuilder[HttpHeaderCheckType, Response, String] =
-    header(HttpHeaderNames.Authorization).saveAs("authBearerToken")
+  def saveAuthBearerToken: CheckBuilder[HttpHeaderCheckType, Response, String] = {
+    header(HttpHeaderNames.Authorization).saveAs("accessToken")
+  }
 
   val postLink: HttpRequestBuilder =
     http("Payment Link Request")
@@ -101,6 +102,7 @@ val baseUrl: String = baseUrlFor("tfcp")
        |  "affinityGroup": "Individual",
        |  "confidenceLevel": 250,
        |  "credentialStrength": "strong",
+       |  "excludeGnapToken": true,
        |  "enrolments": [],
        |  "nino": "$nino"
        |}
