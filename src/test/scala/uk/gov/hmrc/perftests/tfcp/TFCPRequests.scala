@@ -39,8 +39,8 @@ val baseUrl: String = baseUrlFor("tfcp")
   lazy val baseUrl_Auth_Token: String   = baseUrlFor("auth-retrieve-token")
   lazy val jsonPattern: UnanchoredRegex = """\{"\w+":"([^"]+)""".r.unanchored
 
-  lazy val clientId             = "OYOi7ZgefYKJQqVT7QuYOtNEWTaV"//sys.env("CLIENT_ID")
-  lazy val clientSecret: String = "fe7af946-0344-4336-ab78-3f115c51d1ce"//sys.env("CLIENT_SECRET")
+  lazy val clientId             = sys.env("CLIENT_ID")
+  lazy val clientSecret: String = sys.env("CLIENT_SECRET")
   lazy val redirectUri: String  = "urn:ietf:wg:oauth:2.0:oob"
   lazy val authBaseUrl: String  = baseUrlFor("auth-login-stub")
 
