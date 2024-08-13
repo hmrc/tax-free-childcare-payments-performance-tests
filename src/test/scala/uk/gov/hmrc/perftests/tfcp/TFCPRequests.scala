@@ -136,7 +136,7 @@ val baseUrl: String = baseUrlFor("tfcp")
        | {
        | "epp_unique_customer_id":"$eppUniqueCustomerId",
        | "epp_reg_reference":"$eppRegReference",
-       | "payment_amount":"$paymentAmount",
+       | "payment_amount":$paymentAmount,
        | "ccp_reg_reference": "$ccpRegReference",
        | "ccp_postcode": "$ccpPostcode",
        | "payee_type": "$payeeType",
@@ -201,7 +201,7 @@ val baseUrl: String = baseUrlFor("tfcp")
       .check(status.is(303))
       .check(
         header("Location")
-          .is(authBaseUrl + "/gg/sign-in?continue=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend")
+          .is(authBaseUrl + "/gg/sign-in?continue=%2Foauth%2Fgrantscope%3Fauth_id%3D${auth_id}&origin=oauth-frontend"+s"&clientId=$clientId")
       )
 
   def getCredentialsPage: HttpRequestBuilder =
