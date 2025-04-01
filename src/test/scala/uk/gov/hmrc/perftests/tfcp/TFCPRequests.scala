@@ -62,7 +62,7 @@ val baseUrl: String = baseUrlFor("tfcp")
   val postLink: HttpRequestBuilder =
     http("Payment Link Request")
       .post(s"$baseUrl/link")
-      .header("Authorization", s"Bearer $bearerToken")
+      .header("Authorization",  s"Bearer $bearerToken")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.2+json")
       .header("Correlation-ID", "${correlationId}")
@@ -76,7 +76,7 @@ val baseUrl: String = baseUrlFor("tfcp")
       .post(s"$baseUrl/balance")
       .header("Content-Type", "application/json")
       .header("Accept", "application/vnd.hmrc.1.2+json")
-      .header("Authorization", s"Bearer $bearerToken")
+      .header("Authorization",  s"Bearer $bearerToken")
       .header("Correlation-ID", "${correlationId}")
       .header("Referer", "")
       .body(StringBody(balancePayload("${eppUniqueCustomerId}","${eppRegReference}","${outboundChildPaymentRef}")))
@@ -253,7 +253,8 @@ val baseUrl: String = baseUrlFor("tfcp")
       .check(status.is(200))
       .check(css("#authorisation-code").ofType[String].saveAs("code"))
 
-  def getAccessTokenGG: HttpRequestBuilder =
+  def getAccessTokenGG: HttpRequestBuilder = {
+    Console.println("123")
     http("Retrieve Access Token through GG")
       .post(s"$baseUrl_Auth_Token/oauth/token")
       .headers(Map("Content-Type" -> "application/x-www-form-urlencoded"))
@@ -275,5 +276,6 @@ val baseUrl: String = baseUrlFor("tfcp")
           .saveAs("accessToken")
       )
       .check(status.is(200))
+  }
 
 }
