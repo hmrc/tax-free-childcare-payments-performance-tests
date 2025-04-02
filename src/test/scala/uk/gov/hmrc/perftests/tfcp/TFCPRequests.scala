@@ -254,7 +254,6 @@ val baseUrl: String = baseUrlFor("tfcp")
       .check(css("#authorisation-code").ofType[String].saveAs("code"))
 
   def getAccessTokenGG: HttpRequestBuilder = {
-    Console.println("123")
     http("Retrieve Access Token through GG")
       .post(s"$baseUrl_Auth_Token/oauth/token")
       .headers(Map("Content-Type" -> "application/x-www-form-urlencoded"))
